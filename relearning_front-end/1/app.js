@@ -112,4 +112,95 @@ window.onload = function() {
   );
   
   console.log(testCount);
+
+
+
+  function NumberOf(base) {
+    const type = typeof base;
+
+    if (type === 'object') {
+      if (base === null) {
+        return 0;
+      }
+
+      let value = NaN;
+      if (typeof base.valueOf === 'function') {
+        value = baseTypeNumberOf(base.valueOf());
+      }
+
+      if (Number.isNaN(value)) {
+        if (typeof base.toString === 'function') {
+          value = baseTypeNumberOf(base.toString());
+        }
+      }
+
+      return value;
+    } else {
+      return baseTypeNumberOf(base, type);
+    }
+  }
+
+  function baseTypeNumberOf(base, type) {
+    if (base === null) {
+      return 0;
+    }
+
+    if (type === undefined) {
+      type = typeof base;
+    }
+
+    switch (type) {
+      case 'boolean': return base ? 1 : 0;
+      case 'number': return base;
+      case 'undefined':
+      case 'string':
+        const regZ = /^-?\d+$/;
+        const regX = /^-?(\d*\.\d+|\d+\.\d*)$/;
+        const regS = /^0x[\da-f]+$/i;
+        const regB = /^0o[0-7]+$/i;
+        const regE = /^0b[0|1]+$/i;
+        // ''
+        if (base === '') {
+          return 0;
+        }
+        // 整数（负数）
+        // 小数 (.34, 12.)
+        // 十六进制，八进制，二进制数
+        else if (
+          regZ.test(base) ||
+          regX.test(base) ||
+          regS.test(base) ||
+          regB.test(base) ||
+          regE.test(base)
+        ) {
+          return new Number(base).valueOf();
+        }
+        // 其他 => NaN
+        else {
+          return NaN;
+        }
+      default:
+        return NaN;
+    }
+  }
+
+  console.log(NumberOf({})); // NaN
+  console.log(NumberOf({ valueOf: () => 1})); // 1
+  console.log(NumberOf({ valueOf: () => '12'}));  // 12
+  console.log(NumberOf([2]));  // 2
+  console.log(NumberOf(true)); // 1
+  console.log(NumberOf(97)); // 97
+  console.log(NumberOf(0xa)); // 10
+  console.log(NumberOf(-.1)); // -0.1
+  console.log(NumberOf(null)); // 0
+  console.log(NumberOf(undefined)); // NaN
+  console.log(NumberOf('0xa')); // 10
+  console.log(NumberOf('0x1f')); // 31
+  console.log(NumberOf('0b11')); // 3
+  console.log(NumberOf('1234')); // 1234
+  console.log(NumberOf('1234abc')); // NaN
+  console.log(NumberOf('12.')); // 12
+  console.log(NumberOf('-.34')); // -0.34
+  console.log(NumberOf('Hello World')); // NaN
+
 }
